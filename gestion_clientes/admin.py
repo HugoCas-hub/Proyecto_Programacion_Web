@@ -1,11 +1,12 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin 
 from .models import (
     Usuario, Cliente, TipoDocumento, EstadoDocumento, 
     Documento, Notificacion, Log, HistorialDocumento, ConfiguracionAlerta
 )
 
 # 1. Registros Simples (Catálogos)
-admin.site.register(Usuario)
+admin.site.register(Usuario,UserAdmin)
 admin.site.register(Cliente)
 admin.site.register(TipoDocumento)
 admin.site.register(EstadoDocumento)
