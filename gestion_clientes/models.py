@@ -158,3 +158,19 @@ class Log(models.Model):
 
     class Meta:
         db_table = 'logs'
+
+class ReporteGenerado(models.Model):
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    archivo = models.FileField(upload_to='reportes_personalizados/')
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Reporte de {self.cliente.nombre} - {self.creado_en.strftime('%Y-%m-%d')}"
+
+class NotaReporte(models.Model):
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    contenido = models.TextField()
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Nota para {self.cliente.nombre} - {self.fecha_creacion}"
