@@ -7,3 +7,4 @@ class GestionClientesConfig(AppConfig):
     def ready(self):
         # Esta línea es la "llave" que activa las Signals del models.py
         import gestion_clientes.models
+        import gestion_clientes.signals

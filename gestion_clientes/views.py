@@ -1,5 +1,7 @@
 from rest_framework import viewsets, permissions
 from rest_framework.response import Response
+from django.core.mail import send_mail
+from django.conf import settings
 from .models import (
     Cliente, Documento, TipoDocumento, 
     EstadoDocumento, ReporteGenerado, Usuario
@@ -22,11 +24,20 @@ class DocumentoViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         user = self.request.user if self.request.user.is_authenticated else None
-        serializer.save(creado_por=user)
+        
+        documento = serializer.save(creado_por=user)
+
+        send_mail(
+            subject='Nuevo documento registrado',
+            message=f'Se registró el documento: {documento.nombre}',
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=['destino@gmail.com'],
+            fail_silently=False,
+        )
 
     def perform_update(self, serializer):
         user = self.request.user if self.request.user.is_authenticated else None
-        serializer.save(creado_por=user) # Mantenemos rastro de quién modificó
+        serializer.save(creado_por=user)
 
 class ReporteGeneradoViewSet(viewsets.ModelViewSet):
     # Ordenamos por fecha para que lo más nuevo salga primero en React
