@@ -5,6 +5,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.contrib.auth.models import AbstractUser
 
+
 class Usuario(AbstractUser):
     nombre = models.CharField(max_length=100)
     rol = models.CharField(max_length=50, choices=[('admin', 'Administrador'), ('empleado', 'Empleado')])
@@ -18,19 +19,38 @@ class Cliente(models.Model):
     def __str__(self): return self.nombre
 
 class TipoDocumento(models.Model):
-    nombre_tipo = models.CharField(max_length=100)
+    nombre_tipo = models.CharField(max_length=100, unique=True)
     def __str__(self): return self.nombre_tipo
 
 class EstadoDocumento(models.Model):
-    nombre = models.CharField(max_length=50)
-    color = models.CharField(max_length=20)
-    def __str__(self): return self.nombre
+
+    OPCIONES_COLOR = [
+        ('gris', '⚪ Gris'),
+        ('verde', '🟢 Verde'),
+        ('amarillo', '🟡 Amarillo'),
+        ('rojo', '🔴 Rojo'),
+    ]
+
+    nombre = models.CharField(
+        max_length=50,
+        unique=True
+    )
+
+    color = models.CharField(
+        max_length=20,
+        choices=OPCIONES_COLOR,
+        default='gris',
+        blank=True
+    )
+
+    def __str__(self):
+        return self.nombre
 
 class Documento(models.Model):
     id_documento = models.AutoField(primary_key=True)
-    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='documentos')
-    tipo = models.ForeignKey(TipoDocumento, on_delete=models.CASCADE)
-    estado = models.ForeignKey(EstadoDocumento, on_delete=models.CASCADE)
+    cliente = models.ForeignKey(Cliente, on_delete=models.PROTECT, related_name='documentos')
+    tipo = models.ForeignKey(TipoDocumento, on_delete=models.PROTECT)
+    estado = models.ForeignKey(EstadoDocumento, on_delete=models.PROTECT)
     fecha_vencimiento = models.DateField(null=True, blank=True)
     archivo = models.FileField(upload_to='documentos/', null=True, blank=True)
     creado_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
@@ -44,14 +64,17 @@ class Documento(models.Model):
         if dias <= 0: return "rojo"
         if dias <= 30: return "amarillo"
         return "verde"
+    
+    def __str__(self):
+        return f"{self.cliente.nombre} - {self.tipo.nombre_tipo} - {self.estado.nombre}"  
 
 class ReporteGenerado(models.Model):
     id_reporte = models.AutoField(primary_key=True)
-    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    cliente = models.ForeignKey(Cliente,on_delete=models.PROTECT,null=True,blank=True)
     usuario_creador = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     tipo_tramite = models.CharField(max_length=100, null=True, blank=True)
     estatus_doc = models.CharField(max_length=50, null=True, blank=True)
-    notas_reporte = models.TextField()
+    notas_reporte = models.TextField(blank=True, null=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
     class Meta:
