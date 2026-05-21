@@ -1,13 +1,50 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 from .models import (
     Usuario, Cliente, Documento, TipoDocumento, 
     EstadoDocumento, ReporteGenerado
 )
 
 @admin.register(Usuario)
-class UsuarioAdmin(admin.ModelAdmin):
-    list_display = ('username', 'nombre', 'rol', 'email')
-    search_fields = ('username', 'nombre')
+class UsuarioAdmin(UserAdmin):
+
+    model = Usuario
+
+    list_display = (
+        'username',
+        'nombre',
+        'rol',
+        'email',
+        'is_staff'
+    )
+
+    search_fields = (
+        'username',
+        'nombre',
+        'email'
+    )
+
+    fieldsets = UserAdmin.fieldsets + (
+
+        ('Información Extra', {
+            'fields': (
+                'nombre',
+                'rol'
+            )
+        }),
+
+    )
+
+    add_fieldsets = UserAdmin.add_fieldsets + (
+
+        ('Información Extra', {
+            'fields': (
+                'nombre',
+                'rol'
+            )
+        }),
+
+    )
 
 @admin.register(Cliente)
 class ClienteAdmin(admin.ModelAdmin):
